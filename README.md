@@ -2,4 +2,4 @@ Diffusion
 =========
 
 Modeling of diffusion processes
-Go to http://flight.github.com/diffusion/ to view modelling.
+Go to http://flight.github.com/diffusion2/ to view modelling.
