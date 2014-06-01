@@ -1,10 +1,10 @@
 $(document).ready(function(){
-	var canvas = document.getElementById("myCanvas");					// Zadaemo holst
-    var canvasWidth = canvas.width;										// Zadaemo shirinu holstu
-    var canvasHeight = canvas.height;									// Zadaemo visotu holstu
-    var ctx = canvas.getContext("2d");									// Viznachaemo 2d koordinaty
-    var canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
-    var c_prev, c_next, c_full;
+	var canvas = document.getElementById("myCanvas"),					// Zadaemo holst
+    	canvasWidth = canvas.width,										// Zadaemo shirinu holstu
+    	canvasHeight = canvas.height,									// Zadaemo visotu holstu
+    	ctx = canvas.getContext("2d"),									// Viznachaemo 2d koordinaty
+    	canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight),
+    	c_prev, c_next, c_full;
 
     // Stvoruemo ob'ekt dlay zberigannya
     $.storage = new $.store();
