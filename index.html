@@ -42,54 +42,54 @@
             </div>
 
             <label><input name="T" type="number" value="" min="0" default="7200000" id="param_T"> Час процесу, c (<strong id="formatted_time"></strong>)</label><br>
-            <label><input name="L" type="number" value="" min="0" default="0.001" step="0.001" id="param_L"> Ширина пластини, м</label><br>
+            <label><input name="W" type="number" value="" min="0" default="0.001" step="0.001" id="param_W"> Ширина пластини, м</label><br>
             <label><input name="H" type="number" value="" min="0" default="0.001" step="0.001" id="param_H"> Висота пластини, м</label><br>
             <br>
 
             <strong>Перша домiшка</strong><br>
-            <select name="" id="">
-                <option value="">P (Фосфор), D = 5*10^-13 (1150 &deg;C)</option>
-                <option value="">B (Бор), D = 5*10^-13 (1150 &deg;C)</option>
+            <select name="AD" id="param_AD">
+                <option value="1">P (Фосфор), D = 5*10^-13 (1150 &deg;C)</option>
+                <option value="2">B (Бор), D = 5*10^-13 (1150 &deg;C)</option>
             </select> Назва домішки<br>
             <em>Верхній край:</em><br>
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_">
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_"> Границі домішки, м<br>
-            <label><input name="C1-1" type="number" value="" min="0" default="2" max="5" id="param_C1-1"> Концентрація домішки, об.%</label><br>
+            <input name="ATX1" type="number" value="" min="0" default="0.001" step="0.001" id="param_ATX1">
+            <input name="ATX2" type="number" value="" min="0" default="0.001" step="0.001" id="param_ATX2"> Границі домішки, м<br>
+            <label><input name="ATC" type="number" value="" min="0" default="2" max="5" id="param_ATC"> Концентрація домішки, об.%</label><br>
             <em>Нижній край:</em><br>
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_">
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_"> Границі домішки, м<br>
-            <label><input name="C1-1" type="number" value="" min="0" default="2" max="5" id="param_C1-1"> Концентрація домішки, об.%</label><br>
+            <input name="ABX1" type="number" value="" min="0" default="0.001" step="0.001" id="param_ABX1">
+            <input name="ABX2" type="number" value="" min="0" default="0.001" step="0.001" id="param_ABX2"> Границі домішки, м<br>
+            <label><input name="ABC" type="number" value="" min="0" default="2" max="5" id="param_ABC"> Концентрація домішки, об.%</label><br>
             <em>Лівий край:</em><br>
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_">
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_"> Границі домішки, м<br>
-            <label><input name="C1-1" type="number" value="" min="0" default="2" max="5" id="param_C1-1"> Концентрація домішки, об.%</label><br>
+            <input name="ALY1" type="number" value="" min="0" default="0.001" step="0.001" id="param_ALY1">
+            <input name="ALY2" type="number" value="" min="0" default="0.001" step="0.001" id="param_ALY2"> Границі домішки, м<br>
+            <label><input name="ALC" type="number" value="" min="0" default="2" max="5" id="param_ALC"> Концентрація домішки, об.%</label><br>
             <em>Правий край:</em><br>
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_">
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_"> Границі домішки, м<br>
-            <label><input name="C1-1" type="number" value="" min="0" default="2" max="5" id="param_C1-1"> Концентрація домішки, об.%</label><br>
+            <input name="ARY1" type="number" value="" min="0" default="0.001" step="0.001" id="param_ARY1">
+            <input name="ARY2" type="number" value="" min="0" default="0.001" step="0.001" id="param_ARY2"> Границі домішки, м<br>
+            <label><input name="ARC" type="number" value="" min="0" default="2" max="5" id="param_ARC"> Концентрація домішки, об.%</label><br>
             <br>
 
             <strong>Друга домiшка</strong><br>
-            <select name="" id="">
-                <option value="">P (Фосфор), D = 5*10^-13 (1150 &deg;C)</option>
-                <option value="">B (Бор), D = 5*10^-13 (1150 &deg;C)</option>
+            <select name="BD" id="param_BD">
+                <option value="3">P (Фосфор), D = 5*10^-13 (1150 &deg;C)</option>
+                <option value="4">B (Бор), D = 5*10^-13 (1150 &deg;C)</option>
             </select> Назва домішки<br>
             <em>Верхній край:</em><br>
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_">
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_"> Границі домішки, м<br>
-            <label><input name="C1-1" type="number" value="" min="0" default="2" max="5" id="param_C1-1"> Концентрація домішки, об.%</label><br>
+            <input name="BTX1" type="number" value="" min="0" default="0.001" step="0.001" id="param_BTX1">
+            <input name="BTX2" type="number" value="" min="0" default="0.001" step="0.001" id="param_BTX2"> Границі домішки, м<br>
+            <label><input name="BTC" type="number" value="" min="0" default="2" max="5" id="param_BTC"> Концентрація домішки, об.%</label><br>
             <em>Нижній край:</em><br>
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_">
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_"> Границі домішки, м<br>
-            <label><input name="C1-1" type="number" value="" min="0" default="2" max="5" id="param_C1-1"> Концентрація домішки, об.%</label><br>
+            <input name="BBX1" type="number" value="" min="0" default="0.001" step="0.001" id="param_BBX1">
+            <input name="BBX2" type="number" value="" min="0" default="0.001" step="0.001" id="param_BBX2"> Границі домішки, м<br>
+            <label><input name="BBC" type="number" value="" min="0" default="2" max="5" id="param_BBC"> Концентрація домішки, об.%</label><br>
             <em>Лівий край:</em><br>
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_">
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_"> Границі домішки, м<br>
-            <label><input name="C1-1" type="number" value="" min="0" default="2" max="5" id="param_C1-1"> Концентрація домішки, об.%</label><br>
+            <input name="BLY1" type="number" value="" min="0" default="0.001" step="0.001" id="param_BLY1">
+            <input name="BLY2" type="number" value="" min="0" default="0.001" step="0.001" id="param_BLY2"> Границі домішки, м<br>
+            <label><input name="BLC" type="number" value="" min="0" default="2" max="5" id="param_BLC"> Концентрація домішки, об.%</label><br>
             <em>Правий край:</em><br>
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_">
-            <input name="" type="number" value="" min="0" default="0.001" step="0.001" id="param_"> Границі домішки, м<br>
-            <label><input name="C1-1" type="number" value="" min="0" default="2" max="5" id="param_C1-1"> Концентрація домішки, об.%</label><br>
+            <input name="BRY1" type="number" value="" min="0" default="0.001" step="0.001" id="param_BRY1">
+            <input name="BRY2" type="number" value="" min="0" default="0.001" step="0.001" id="param_BRY2"> Границі домішки, м<br>
+            <label><input name="BRC" type="number" value="" min="0" default="2" max="5" id="param_BRC"> Концентрація домішки, об.%</label><br>
             <br>
             
             <div class="output">Безрозмірна дифузія: <strong id="diffusion"></strong> <div class="dec-red">(якщо більше, ніж 100, операція займе багато часу)</div></div>

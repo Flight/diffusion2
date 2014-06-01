@@ -74,8 +74,10 @@ $(document).ready(function(){
 	function getParam(name) {
 		var $param = $('#param_'+name);
 		if ($param.is('[type="number"]')) {
+			console.log( name + ': ' + parseFloat( $param.val() ) );
 			return parseFloat($param.val());
 		} else if ($param.is('[type="radio"]') || $param.is('[type="checkbox"]')) {
+			console.log( name + ': ' + $param.is(':checked') );
 			return $param.is(':checked');
 		}
 	}
@@ -116,32 +118,58 @@ $(document).ready(function(){
 	});
 
 	function evaluate() {
-		var T = getParam('T'),			// chasProcessu, sec
-			L = getParam('L'),			// dovzhinaSterzhnu, m
+		var T = getParam('T'),			// chas processu, sec
+			W = getParam('W'),			// shirina plastini, m
+			H = getParam('H'),			// dovzhina plastini, m
 			k = canvasHeight,			// proponovana kilkist intervaliv chasu
 			xn = 6,						// koeficient mnozhennya n
 			n = (canvasWidth-1)/xn,		// proponovana kilkist intervaliv po X
-			D = getParam('D'),			// koefficient difuzii, m2/s
-			Cmax = getParam('Cmax'),	// granichna rozchinnist, %
-			C1 = getParam('C1'),		// koncentraciya na livomu krai plastini, %
-			C2 = getParam('C2'),		// koncentraciya na pravomu krai plastini, %
-			C1m = Math.min(Cmax, C1),	// koncentraciya na livomu krai plastini z urahuvannyam rozchinnosti, %
-			C2m = Math.min(Cmax, C2),	// koncentraciya na pravomu krai plastini z urahuvannyam rozchinnosti, %
-			Q1 = getParam('Q1'),		// kilkist leguuchoi prisadki na livomu krai plastini, %*m
-			Q2 = getParam('Q2'),		// kilkist leguuchoi prisadki na pravomu krai plastini, %*m
-			// Umoby leguvannya na livomu krau plastini
-			boundTypeLeft = parseInt($('[name="bound_type_left"]:checked').val()),
-			// Umoby leguvannya na pravomu krau plastini
-			boundTypeRight = parseInt($('[name="bound_type_right"]:checked').val()),
+			AD = getParam('AD'),		// koefficient difuzii pershoi domishki, m2/s
+			BD = getParam('BD'),		// koefficient difuzii drugoi domishki, m2/s
+			Cmax = 100,					// granichna rozchinnist, %
+
+			ATX1 = getParam('ATX1'),	// persha verhnya granicya pershoi domishki, m
+			ATX2 = getParam('ATX2'),	// druga verhnya granicya pershoi domishki, m
+			ABX1 = getParam('ABX1'),	// persha nizhnya granicya pershoi domishki, m
+			ABX2 = getParam('ABX2'),	// druga nizhnya granicya pershoi domishki, m
+			ALY1 = getParam('ALY1'),	// persha liva granicya pershoi domishki, m
+			ALY2 = getParam('ALY2'),	// druga liva granicya pershoi domishki, m
+			ARY1 = getParam('ARY1'),	// persha prava granicya pershoi domishki, m
+			ARY2 = getParam('ARY2'),	// druga prava granicya pershoi domishki, m
+
+			BTX1 = getParam('BTX1'),	// persha verhnya granicya drugoi domishki, m
+			BTX2 = getParam('BTX2'),	// druga verhnya granicya drugoi domishki, m
+			BBX1 = getParam('BBX1'),	// persha nizhnya granicya drugoi domishki, m
+			BBX2 = getParam('BBX2'),	// druga nizhnya granicya drugoi domishki, m
+			BLY1 = getParam('BLY1'),	// persha liva granicya drugoi domishki, m
+			BLY2 = getParam('BLY2'),	// druga liva granicya drugoi domishki, m
+			BRY1 = getParam('BRY1'),	// persha prava granicya drugoi domishki, m
+			BRY2 = getParam('BRY2'),	// druga prava granicya drugoi domishki, m
+
+			ATC = getParam('ATC'),		// koncentraciya pershoi domishki na verhnyomu krai, %
+			ABC = getParam('ABC'),		// koncentraciya pershoi domishki na nizhnyoumu krai, %
+			ALC = getParam('ALC'),		// koncentraciya pershoi domishki na livomu krai, %
+			ARC = getParam('ARC'),		// koncentraciya pershoi domishki na pravomu krai, %
+
+			BTC = getParam('BTC'),		// koncentraciya drugoi domishki na verhnyomu krai, %
+			BBC = getParam('BBC'),		// koncentraciya drugoi domishki na nizhnyoumu krai, %
+			BLC = getParam('BLC'),		// koncentraciya drugoi domishki na livomu krai, %
+			BRC = getParam('BRC'),		// koncentraciya drugoi domishki na pravomu krai, %
+
 			// Vikoristovuvaty poperedni rezultaty
 			usePrev = $('[name="use_prev"]').is(':checked'),
-			sk = parseInt($('[name="sk"]:checked').val()),
+
 			QL = null,					// kilkist leguuchoi prisadki na livomu krai plastini, %*m
 			QR = null,					// kilkist leguuchoi prisadki na pravomu krai plastini, %*m
 			dt = T/k,					// delta, sec
-			dl = L/n,					// krok po X, m
-			G = D*dt/(dl*dl),			// Bezrozmirna difuziya
+			dl = W/n,					// krok po X, m
+			AG = AD*dt/(dl*dl),			// Bezrozmirna difuziya
 			m = 1;						// Dopomizhniy krok po chasu
+
+		console.log( 'test' );
+		console.log( this );
+
+		return;
 
 		console.log('boundTypeLeft: ' + boundTypeLeft);
 		console.log('boundTypeRight: ' + boundTypeRight);
