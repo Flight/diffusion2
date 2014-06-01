@@ -115,20 +115,6 @@ $(document).ready(function(){
 		$('#formatted_time').html(convertTime($('#param_T').val()));
 	});
 
-	// function initCLeft() {
-	// 	if ($('[name="sk"]:checked').val() == '1') {
-	// 		$('#c_left').hide();
-	// 		$('#c_right .header-small').html('Умови легування на поверхні циліндра');
-	// 	} else {
-	// 		$('#c_left').show();
-	// 		$('#c_right .header-small').html('Умови легування на правому краю пластини');
-	// 	}
-	// }
-
-	// $('[name="sk"]').change(function() {
-	// 	initCLeft();
-	// })
-
 	function evaluate() {
 		var T = getParam('T'),			// chasProcessu, sec
 			L = getParam('L'),			// dovzhinaSterzhnu, m
