@@ -177,8 +177,8 @@
 			BD = getDiffusion(BName, TS);
 
 			$( '#koef_A, #koef_B' ).show();
-			$( '#dif_A' ).text( AD );
-			$( '#dif_B' ).text( BD );
+			$( '#dif_A' ).text( AD.toPrecision(3) );
+			$( '#dif_B' ).text( BD.toPrecision(3) );
 		}
 
 		$('#param_TS, #param_AName, #param_BName').bind('change', updateDiffusion).change();
@@ -203,10 +203,13 @@
 
 				dt = T/k,							// delta, sec
 				dl = Math.max( W, H )/n,			// krok po X, m
+				nx = W/dl,							// kilkist intervaliv po shiriny
+				ny = H/dl,							// kilkist intervaliv po glubiny
 				G = Math.max(AD, BD)*dt/(dl*dl),	// bezrozmirna difuziya
-				P,									// kilkist promizhnyh tochok
-				deltaP;								// krok rozrahunkovoi shemi po chasu
-
+				P,									// kilkist promizhnyh tochok po chasu
+				deltaP,								// krok rozrahunkovoi shemi po chasu
+				AGU = [],							// masiv granichnih umov pershoi domishki
+				BGU = [];							// masiv granichnih umov drugoi domishki
 
 			if ( BSpaces.length && BD > AD ) {
 				DMax = BD;
@@ -221,11 +224,30 @@
 				deltaP = dt/P;
 			}
 
+			for (var i = 0; i <= nx; i++) {
+				AGU[i] = 0;
+				BGU[i] = 0;
+			}
+
+			ASpaces.forEach(function(ASpace) {
+				for (var i = Math.round(ASpace[0]/dl); i <= Math.round(ASpace[1]/dl); i++) {
+					AGU[i] = ASpace[2];
+				}
+			});
+			BSpaces.forEach(function(BSpace) {
+				for (var i = Math.round(BSpace[0]/dl); i <= Math.round(BSpace[1]/dl); i++) {
+					BGU[i] = BSpace[2];
+				}
+			});
+
+			console.log( AGU );
+
 
 			return;
 
 			console.log('usePrev: ' + usePrev);
 			console.log('Безрозмірна дифузія: ' + G);
+
 			if (G) {
 				$('#diffusion').html(G);
 			} else {
