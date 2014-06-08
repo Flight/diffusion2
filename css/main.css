@@ -17,7 +17,7 @@ body {font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #000; b
 #options input[type="radio"], #options input[type="checkbox"] {position: relative; top: -1px;}
 #options input[type="text"], #options input[type="number"] {width: 100px; margin: 5px 10px 5px 0;}
 #options input[type="button"] {font-size: 16px; margin: 14px 0;}
-#options select {width: 250px; margin: 5px 10px 5px 0;}
+#options select {width: 104px; margin: 5px 10px 5px 0;}
 #options .output {background: #CCC; margin: 10px 0;}
 #options .radio {margin: 4px 0; display: block;}
 #options .default[type="button"] {margin: 0;}
