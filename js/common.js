@@ -201,7 +201,7 @@
 			var T = getParam('T'),					// chas processu, sec
 				W = getParam('W'),					// shirina plastini, m
 				H = getParam('H'),					// glubina plastini, m
-				k = canvasHeight,					// proponovana kilkist intervaliv chasu
+				tn = 600,							// proponovana kilkist intervaliv chasu
 				xn = 1,								// koeficient mnozhennya n
 				n = (canvasWidth-1)/xn,				// proponovana kilkist intervaliv po X
 				Cmax = 100,							// granichna rozchinnist, %
@@ -215,12 +215,11 @@
 				// Vikoristovuvaty poperedni rezultaty
 				usePrev = $('[name="use_prev"]').is(':checked'),
 
-				dt = T/k,							// delta, sec
+				dt = T/tn,							// delta, sec
 				dl = Math.max( W, H )/n,			// krok po X, m
 				nx = W/dl,							// kilkist intervaliv po shiriny
 				ny = H/dl,							// kilkist intervaliv po glubiny
-				G = Math.max(AD, BD)*dt/(dl*dl),	// bezrozmirna difuziya
-				Gp = G,								// bezrozmirna difuziya dlya rozrahunkovoi sitki
+				G = 1,								// bezrozmirna difuziya
 				P = 1,								// kilkist promizhnyh tochok po chasu
 				deltaP,								// krok rozrahunkovoi shemi po chasu
 				ANU = [],							// masiv pochatkovih umov pershoi domishki
@@ -228,7 +227,9 @@
 				AGU = [],							// masiv granichnih umov pershoi domishki
 				BGU = [],							// masiv granichnih umov drugoi domishki
 				Aprev = [],							// masiv poperednyogo slou pershoi domishki
-				Bprev = [];							// masiv poperednyogo slou drugoi domishki
+				Bprev = [],							// masiv poperednyogo slou drugoi domishki
+				Acalc = [],							// rezultuuchiy masiv visualizacii A
+				Bcalc = [];							// rezultuuchiy masiv visualizacii B
 
 			if ( BSpaces.length && BD > AD ) {
 				DMax = BD;
@@ -236,22 +237,55 @@
 				DMax = AD;
 			}
 
-			deltaMax = H*H/(2*DMax);
+			deltaMax = dl*dl/(10*DMax);
+
+			console.log( 'deltaMax:' );
+			console.log( deltaMax );
+
+			console.log( 'DMax:' );
+			console.log( DMax );
+
+			console.log( 'dl:' );
+			console.log( dl );
 
 			if (dt > deltaMax) {
-				P = dt/deltaMax;
-				deltaP = dt/P;
-				Gp = G/P;
+				P = Math.round(dt/deltaMax+0.5);
 			}
 
-			console.log( 'Gp:' );
-			console.log( Gp );
+			console.log( 'P:' );
+			console.log( P );
+
+			console.log( 'dt:' );
+			console.log( dt );
+
+			deltaP = dt/P;
+			G = DMax*deltaP/(dl*dl);
+
+			console.log( 'G:' );
+			console.log( G );
+
+
+			if (P*tn > 10000) {
+				alert('Ця операція не може бути виконана за розумний час!');
+				return;
+			} else if (P*tn > 500) {
+				if (!confirm('Ця операція займе багато часу, ві впевнені, що хочете продовжити?')) {
+					return;
+				}
+			}
+
+			if (P*tn) {
+				$('#layers').html(P*tn);
+			} else {
+				$('#layers').html('Помилка!');
+				return;
+			}
 
 			for (var i = 0; i <= nx; i++) {
 				AGU[i] = 0;
 				BGU[i] = 0;
 			}
-				
+
 			for (var j = 0; j <= ny; j++) {
 				ANU[j] = [];
 				BNU[j] = [];
@@ -262,12 +296,12 @@
 				for (var i = 0; i <= nx; i++) {
 					ANU[j][i] = 0;
 					BNU[j][i] = 0;
-					
+
 					Aprev[j][i] = 0;
 					Bprev[j][i] = 0;
 				}
 			}
-			
+
 			if (!APR) {
 				APR = [];
 				BPR = [];
@@ -313,81 +347,53 @@
 			console.log( 'APR[0]:' );
 			console.log( APR[0] );
 
-			for (var k=0; k < P; k++) {
-				Aprev = deepCopy(APR);
-				Bprev = deepCopy(BPR);
+			Acalc[0] = deepCopy(APR);
+			Bcalc[0] = deepCopy(BPR);
 
-				console.log( 'Aprev[0]:' );
-				console.log( Aprev[0] );
+			for (var t=1; t < tn; t++) {
+				for (var k=0; k < P; k++) {
+					Aprev = deepCopy(APR);
+					Bprev = deepCopy(BPR);
 
-				for (var i = 0; i <= nx; i++) {		// Verhnya ta nizhnya stinki
-					if (AGU[i] > 0) {
-						APR[0][i] = AGU[i];			// umova pershogo rody
-					} else {
-						APR[0][i] = Aprev[1][i];	// umova drugogo rody
-					}
-					APR[ny][i] = Aprev[ny-1][i];	// umova drugogo rody
+					for (var i = 0; i <= nx; i++) {		// Verhnya ta nizhnya stinki
+						if (AGU[i] > 0) {
+							APR[0][i] = AGU[i];			// umova pershogo rody
+						} else {
+							APR[0][i] = Aprev[1][i];	// umova drugogo rody
+						}
+						APR[ny][i] = Aprev[ny-1][i];	// umova drugogo rody
 
-					if (BGU[i] > 0) {
-						BPR[0][i] = BGU[i];			// umova pershogo rody
-					} else {
-						BPR[0][i] = Bprev[1][i];	// umova drugogo rody
-					}
-					BPR[ny][i] = Bprev[ny-1][i];	// umova drugogo rody
-				};
+						if (BGU[i] > 0) {
+							BPR[0][i] = BGU[i];			// umova pershogo rody
+						} else {
+							BPR[0][i] = Bprev[1][i];	// umova drugogo rody
+						}
+						BPR[ny][i] = Bprev[ny-1][i];	// umova drugogo rody
+					};
 
-				console.log( 'Aprev[0][1]:' );
-				console.log( Aprev[0][1] );
+					for (var j = 0; j <= ny; j++) {		// Liva ta prava stinki
+						APR[j][0] = Aprev[j][1];		// umova drugogo rody
+						APR[j][nx] = Aprev[j][nx-1];	// umova drugogo rody
 
-				for (var j = 0; j <= ny; j++) {		// Liva ta prava stinki
-					APR[j][0] = Aprev[j][1];		// umova drugogo rody
-					APR[j][nx] = Aprev[j][nx-1];	// umova drugogo rody
+						BPR[j][0] = Bprev[j][1];		// umova drugogo rody
+						BPR[j][nx] = Bprev[j][nx-1];	// umova drugogo rody
+					};
 
-					BPR[j][0] = Bprev[j][1];		// umova drugogo rody
-					BPR[j][nx] = Bprev[j][nx-1];	// umova drugogo rody
-				};
-
-				console.log( 'APR[0][0]:' );
-				console.log( APR[0][0] );
-
-				for (var j = 1; j <= ny-1; j++) {
-					for (var i = 1; i <= nx-1; i++) {
-						APR[j][i] = ( 1-4*Gp )*Aprev[j][i] + Gp*( Aprev[j-1][i] + Aprev[j][i-1] + Aprev[j][i+1] + Aprev[j+1][i] );
-						BPR[j][i] = ( 1-4*Gp )*Bprev[j][i] + Gp*( Bprev[j-1][i] + Bprev[j][i-1] + Bprev[j][i+1] + Bprev[j+1][i] );
+					for (var j = 1; j <= ny-1; j++) {
+						for (var i = 1; i <= nx-1; i++) {
+							APR[j][i] = ( 1-4*G )*Aprev[j][i] + G*( Aprev[j-1][i] + Aprev[j][i-1] + Aprev[j][i+1] + Aprev[j+1][i] );
+							BPR[j][i] = ( 1-4*G )*Bprev[j][i] + G*( Bprev[j-1][i] + Bprev[j][i-1] + Bprev[j][i+1] + Bprev[j+1][i] );
+						}
 					}
 				}
 
-				if (k = 1) {
-					console.log( 'APR[1]:' );
-					console.log( APR[1] );
-				}
+				Acalc[t] = deepCopy(APR);
+				Bcalc[t] = deepCopy(BPR);
 			}
+			console.log( 'dlina: ' + Acalc.length);
 
 			console.log('usePrev: ' + usePrev);
 			console.log('Безрозмірна дифузія: ' + G);
-
-			if (G) {
-				$('#diffusion').html(G);
-			} else {
-				$('#diffusion').html('Помилка!');
-				return;
-			}
-
-			// if (G > 0.5) {
-			// 	if (G > 1000) {
-			// 		alert('Ця операція не може бути виконана за розумний час!');
-			// 		return;
-			// 	} else if (G > 100) {
-			// 		if (!confirm('Ця операція займе багато часу, ві впевнені, що хочете продовжити?')) {
-			// 			return;
-			// 		}
-			// 	}
-			// 	console.log('Безрозмірна дифузія надто велика, вводимо проміжні точки по часу');
-			// 	m = Math.ceil(2*G);
-			// 	console.log('Проміжна точка по часу:' + m);
-			// 	G = G/m;
-			// 	console.log('Безрозмірна дифузія: ' + G);
-			// }
 
 			var c_max = 0;
 			for (var t = 0; t <= ny; t++) {
