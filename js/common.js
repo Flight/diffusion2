@@ -95,7 +95,7 @@
 				$Spaces.each(function() {
 					var aValues = [];
 					$(this).find('input').each(function() {
-						aValues.push( $(this).val() );
+						aValues.push( parseFloat( $(this).val() ) );
 					});
 
 					aSpaces.push( aValues );
@@ -184,25 +184,25 @@
 
 		$('#param_TS, #param_AName, #param_BName').bind('change', updateDiffusion).change();
 
-		function deepCopy(o) {
-			var copy = o,k;
-
-			if (o && typeof o === 'object') {
-				copy = Object.prototype.toString.call(o) === '[object Array]' ? [] : {};
-				for (k in o) {
-					copy[k] = deepCopy(o[k]);
+		function deepCopy(oldObject) {
+			var newObject = (oldObject instanceof Array) ? [] : {};
+			for (i in oldObject) {
+				if (i == 'deepCopy') continue;
+				if (oldObject[i] && typeof oldObject[i] == "object") {
+					newObject[i] = deepCopy(oldObject[i]);
+				} else {
+					newObject[i] = oldObject[i]
 				}
 			}
-
-			return copy;
+			return newObject;
 		}
 
 		function evaluate() {
 			var T = getParam('T'),					// chas processu, sec
 				W = getParam('W'),					// shirina plastini, m
 				H = getParam('H'),					// glubina plastini, m
-				tn = 600,							// proponovana kilkist intervaliv chasu
-				xn = 1,								// koeficient mnozhennya n
+				tn = 100,							// proponovana kilkist intervaliv chasu
+				xn = 6,								// koeficient mnozhennya n
 				n = (canvasWidth-1)/xn,				// proponovana kilkist intervaliv po X
 				Cmax = 100,							// granichna rozchinnist, %
 
@@ -217,8 +217,8 @@
 
 				dt = T/tn,							// delta, sec
 				dl = Math.max( W, H )/n,			// krok po X, m
-				nx = W/dl,							// kilkist intervaliv po shiriny
-				ny = H/dl,							// kilkist intervaliv po glubiny
+				nx = Math.round(W/dl),				// kilkist intervaliv po shiriny
+				ny = Math.round(H/dl),				// kilkist intervaliv po glubiny
 				G = 1,								// bezrozmirna difuziya
 				P = 1,								// kilkist promizhnyh tochok po chasu
 				deltaP,								// krok rozrahunkovoi shemi po chasu
@@ -237,39 +237,22 @@
 				DMax = AD;
 			}
 
-			deltaMax = dl*dl/(10*DMax);
-
-			console.log( 'deltaMax:' );
-			console.log( deltaMax );
-
-			console.log( 'DMax:' );
-			console.log( DMax );
-
-			console.log( 'dl:' );
-			console.log( dl );
+			deltaMax = dl*dl/(2*DMax);
 
 			if (dt > deltaMax) {
 				P = Math.round(dt/deltaMax+0.5);
 			}
 
-			console.log( 'P:' );
-			console.log( P );
-
-			console.log( 'dt:' );
-			console.log( dt );
-
 			deltaP = dt/P;
 			G = DMax*deltaP/(dl*dl);
 
-			console.log( 'G:' );
-			console.log( G );
-
 
 			if (P*tn > 10000) {
-				alert('Ця операція не може бути виконана за розумний час!');
+				win.alert('Ця операція не може бути виконана за розумний час!');
 				return;
-			} else if (P*tn > 500) {
-				if (!confirm('Ця операція займе багато часу, ві впевнені, що хочете продовжити?')) {
+			}
+			if (P*tn > 500) {
+				if (!win.confirm('Ця операція займе багато часу, ві впевнені, що хочете продовжити?')) {
 					return;
 				}
 			}
@@ -281,19 +264,19 @@
 				return;
 			}
 
-			for (var i = 0; i <= nx; i++) {
+			for (var i = 0; i < nx+1; i++) {
 				AGU[i] = 0;
 				BGU[i] = 0;
 			}
 
-			for (var j = 0; j <= ny; j++) {
+			for (var j = 0; j < ny+1; j++) {
 				ANU[j] = [];
 				BNU[j] = [];
 
 				Aprev[j] = [];
 				Bprev[j] = [];
 
-				for (var i = 0; i <= nx; i++) {
+				for (var i = 0; i < nx+1; i++) {
 					ANU[j][i] = 0;
 					BNU[j][i] = 0;
 
@@ -306,11 +289,11 @@
 				APR = [];
 				BPR = [];
 
-				for (var j = 0; j <= ny; j++) {
+				for (var j = 0; j < ny+1; j++) {
 					APR[j] = [];
 					BPR[j] = [];
 
-					for (var i = 0; i <= nx; i++) {
+					for (var i = 0; i < nx+1; i++) {
 						APR[j][i] = 0;
 						BPR[j][i] = 0;
 					}
@@ -328,113 +311,134 @@
 				}
 			});
 
-			console.log( 'AGU:' );
-			console.log( AGU );
+			// win.console.log( 'AGU:' );
+			// win.console.log( AGU );
 
-			for (var i = 0; i <= nx; i++) {
+			for (var i = 0; i < nx+1; i++) {
 				ANU[0][i] = AGU[i];
 				BNU[0][i] = BGU[i];
 			}
 
-			console.log( 'ANU[0]:' );
-			console.log( ANU[0] );
+			// win.console.log( 'ANU:' );
+			// win.console.log( ANU );
+
+			// win.console.log( 'APR: ' );
+			// win.console.log( APR );
 
 			if (!usePrev) {
 				APR = deepCopy(ANU);
 				BPR = deepCopy(BNU);
 			}
 
-			console.log( 'APR[0]:' );
-			console.log( APR[0] );
-
 			Acalc[0] = deepCopy(APR);
 			Bcalc[0] = deepCopy(BPR);
 
-			for (var t=1; t < tn; t++) {
+			for (var t=0; t < tn; t++) {
 				for (var k=0; k < P; k++) {
 					Aprev = deepCopy(APR);
 					Bprev = deepCopy(BPR);
 
-					for (var i = 0; i <= nx; i++) {		// Verhnya ta nizhnya stinki
+					for (var i = 0; i < nx+1; i++) {		// Verhnya ta nizhnya stinki
 						if (AGU[i] > 0) {
 							APR[0][i] = AGU[i];			// umova pershogo rody
 						} else {
-							APR[0][i] = Aprev[1][i];	// umova drugogo rody
+							APR[0][i] = ( 1-4*G )*Aprev[0][i] + G*( 2*Aprev[1][i]
+								+ ( i > 0 ? Aprev[0][i-1] : Aprev[0][i+1] )
+								+ ( i < nx ? Aprev[0][i+1] : Aprev[0][i-1] ) );	// umova drugogo rody
 						}
-						APR[ny][i] = Aprev[ny-1][i];	// umova drugogo rody
+						APR[ny][i] = ( 1-4*G )*Aprev[ny][i] + G*( 2*Aprev[ny-1][i]
+								+ ( i > 0 ? Aprev[ny][i-1] : Aprev[ny][i+1] )
+								+ ( i < nx ? Aprev[ny][i+1] : Aprev[ny][i-1] ) );	// umova drugogo rody
 
 						if (BGU[i] > 0) {
 							BPR[0][i] = BGU[i];			// umova pershogo rody
 						} else {
-							BPR[0][i] = Bprev[1][i];	// umova drugogo rody
+							BPR[0][i] = ( 1-4*G )*Bprev[0][i] + G*( 2*Bprev[1][i]
+								+ ( i > 0 ? Bprev[0][i-1] : Bprev[0][i+1] )
+								+ ( i < nx ? Bprev[0][i+1] : Bprev[0][i-1] ) );	// umova drugogo rody
 						}
-						BPR[ny][i] = Bprev[ny-1][i];	// umova drugogo rody
+						BPR[ny][i] = ( 1-4*G )*Bprev[ny][i] + G*( 2*Bprev[ny-1][i]
+								+ ( i > 0 ? Bprev[ny][i-1] : Bprev[ny][i+1] )
+								+ ( i < nx ? Bprev[ny][i+1] : Bprev[ny][i-1] ) );	// umova drugogo rody
 					};
 
-					for (var j = 0; j <= ny; j++) {		// Liva ta prava stinki
-						APR[j][0] = Aprev[j][1];		// umova drugogo rody
-						APR[j][nx] = Aprev[j][nx-1];	// umova drugogo rody
-
-						BPR[j][0] = Bprev[j][1];		// umova drugogo rody
-						BPR[j][nx] = Bprev[j][nx-1];	// umova drugogo rody
-					};
-
-					for (var j = 1; j <= ny-1; j++) {
-						for (var i = 1; i <= nx-1; i++) {
-							APR[j][i] = ( 1-4*G )*Aprev[j][i] + G*( Aprev[j-1][i] + Aprev[j][i-1] + Aprev[j][i+1] + Aprev[j+1][i] );
-							BPR[j][i] = ( 1-4*G )*Bprev[j][i] + G*( Bprev[j-1][i] + Bprev[j][i-1] + Bprev[j][i+1] + Bprev[j+1][i] );
+					for (var j = 1; j < ny; j++) {
+						for (var i = 1; i < nx; i++) {
+							APR[j][i] = ( 1-4*G )*Aprev[j][i] + G*( Aprev[j-1][i]
+								+ ( i > 0 ? Aprev[j][i-1] : Aprev[j][i+1] )
+								+ ( i < nx ? Aprev[j][i+1] : Aprev[j][i-1] )
+								+ Aprev[j+1][i] );
+							BPR[j][i] = ( 1-4*G )*Bprev[j][i] + G*( Bprev[j-1][i]
+								+ ( i > 0 ? Bprev[j][i-1] : Bprev[j][i+1] )
+								+ ( i < nx ? Bprev[j][i+1] : Bprev[j][i-1] )
+								+ Bprev[j+1][i] );
 						}
 					}
 				}
 
-				Acalc[t] = deepCopy(APR);
-				Bcalc[t] = deepCopy(BPR);
+				Acalc[t+1] = deepCopy(APR);
+				Bcalc[t+1] = deepCopy(BPR);
 			}
-			console.log( 'dlina: ' + Acalc.length);
 
-			console.log('usePrev: ' + usePrev);
-			console.log('Безрозмірна дифузія: ' + G);
+			// win.console.log( 'Acalc:' );
+			// win.console.log( Acalc );
+
+			win.console.log('usePrev: ' + usePrev);
+			win.console.log('Безрозмірна дифузія: ' + G);
 
 			var c_max = 0;
-			for (var t = 0; t <= ny; t++) {
-				for (var i = 0; i <= nx; i++) {
-					if (APR[t][i] > c_max) {
-						c_max = APR[t][i];
+			var nLayer = 99;
+			for (var j = 0; j < ny+1; j++) {
+				for (var i = 0; i < nx+1; i++) {
+					if (Acalc[nLayer][j][i] > c_max) {
+						c_max = Acalc[nLayer][j][i];
 					}
 				}
 			}
+			win.console.log('Cmax: ' + Cmax);
 
-			var c_extend = new Array(canvasHeight);
-			var c_left = null,
+			var c_extend = new Array(canvasHeight),
+				px = null,
+				py = null;
+				c_left = null,
 				c_right = null,
 				c_current = null;
-			for (var t = 0; t <= nx; t++) {
-				c_extend[t] = new Array(canvasWidth);
-				c_extend[t][0] = APR[t][0];
-				for (var i = 0; i <= ny+1; i++) {
-					c_left = APR[t][i];
-					c_right = APR[t][i+1];
-					c_extend[t][i*xn] = c_left;
-					for (var xi = 1; xi < xn; xi++) {
-						c_current = (c_left*(xn-xi)+c_right*xi)/xn;
-						c_extend[t][i*xn+xi] = c_current;
+
+			for ( var c = 0; c <= canvasWidth; c++ ) {
+				c_extend[c] = new Array(canvasWidth);
+			}
+			for ( var j = 0; j < ny; j++ ) {
+				for ( var i = 0; i < nx; i++ ) {
+					for ( var yi = 0; yi < xn; yi++ ) {
+						py = yi/xn;
+						for ( var xi = 0; xi < xn; xi++ ) {
+							px = xi/xn;
+							c_extend[j*xn+yi][i*xn+xi]
+								= Acalc[nLayer][j][i]*(1-py)*(1-px)
+								+ Acalc[nLayer][j][i+1]*(1-py)*px
+								+ Acalc[nLayer][j+1][i]*py*(1-px)
+								+ Acalc[nLayer][j+1][i+1]*py*px;
+						}
 					}
 				}
 			}
 
-			console.log('c_max: ' + c_max);
+			win.console.log('c_extend');
+			win.console.log(c_extend);
+
+			win.console.log('c_max: ' + c_max);
 			if (!c_max) c_max = 1;
 
-			for (var t = 0; t < k+1; t++) {
-				for (var i = 0; i < canvasWidth; i++) {
-					c_color = Math.ceil(c_extend[t][i] / c_max * 255);
-					drawPixel(i, t, c_color, 0, 255-c_color, 255);
+			for (var cy = 0; cy < canvasWidth; cy++) {
+				for (var cx = 0; cx < canvasWidth; cx++) {
+					c_color = Math.ceil(c_extend[cy][cx] / c_max * 255);
+					drawPixel(cx, cy, c_color, 0, 255-c_color, 255);
 				}
 			}
 			updateCanvas();
 			$('#info, #info2').show();
 
-			$('#options .gradient .right').html(c_max + '%');
+			$('#options .gradient .right').html(c_max.toPrecision(3) + '%');
 
 			$('#myCanvas').mousemove(function() {
 				var coords = canvas.relMouseCoords(event),
@@ -443,15 +447,11 @@
 
 				$('#coordX').html(canvasX);
 				$('#coordY').html(canvasY);
-				$('#conc').html(c_extend[canvasY][canvasX].toFixed(3));
+				$('#conc').html((c_extend[canvasY][canvasX] || 0).toFixed(3));
 
 				$('#time').html((canvasY*dt).toFixed(0));
 				$('#formatted_time2').html(convertTime($('#time').html()));
 				$('#abs').html((canvasX*dl/xn).toFixed(10));
-
-
-				//console.log(canvasX + ':' + canvasY + ':     ' + c_extend[canvasY][canvasX] + '%');
-
 			});
 		};
 
