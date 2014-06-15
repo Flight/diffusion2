@@ -130,14 +130,12 @@
 			minutes = minutes - hours*60;
 			hours = hours - days*24;
 
-			return (days + ' днів ' + ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2));
+			return ( (days > 0 ? (days + ' днів ') : '' ) + ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2));
 		}
 
-		$('#formatted_time').html(convertTime($('#param_T').val()));
-
 		$('#param_T').bind('change keyup', function(){
-			$('#formatted_time').html(convertTime($('#param_T').val()));
-		});
+			$('#formatted_time').html(convertTime( parseFloat( $('#param_T').val()*60 ) ) );
+		}).change();
 
 		( function() {
 			$('.b-space-add-button').bind( 'click', function() {
@@ -178,11 +176,23 @@
 			BD = getDiffusion(BName, TS);
 
 			$( '#koef_A, #koef_B' ).show();
-			$( '#dif_A' ).text( AD.toPrecision(3) );
-			$( '#dif_B' ).text( BD.toPrecision(3) );
+			$( '#dif_A' ).text( (AD*10000).toPrecision(3) );
+			$( '#dif_B' ).text( (BD*10000).toPrecision(3) );
 		}
 
 		$('#param_TS, #param_AName, #param_BName').bind('change', updateDiffusion).change();
+
+		$('.js-element-select').bind('change', function() {
+			var $This = $(this),
+				sElement = $This.val(),
+				aInputs = $( '.' + $(this).data('inputs') );
+
+			aInputs.each( function() {
+				$(this).attr( 'default', leg_elements[sElement].CT.toPrecision(1) );
+				$(this).attr( 'value', leg_elements[sElement].CT.toPrecision(1) );
+				$(this).attr( 'step', leg_elements[sElement].step.toPrecision(1) );
+			});
+		});
 
 		function deepCopy(oldObject) {
 			var newObject = (oldObject instanceof Array) ? [] : {};
@@ -191,16 +201,102 @@
 				if (oldObject[i] && typeof oldObject[i] == "object") {
 					newObject[i] = deepCopy(oldObject[i]);
 				} else {
-					newObject[i] = oldObject[i]
+					newObject[i] = oldObject[i];
 				}
 			}
 			return newObject;
 		}
 
+		function drawLayer( aX, aY, nLayer, dl, nx, ny, xn ) {
+			var A_max = 0,
+				B_max = 0,
+				A_extend = new Array(canvasHeight),
+				B_extend = new Array(canvasHeight),
+				px = null,
+				py = null;
+
+			for (var j = 0; j < ny+1; j++) {
+				for (var i = 0; i < nx+1; i++) {
+					if (aX[nLayer][j][i] > A_max) {
+						A_max = aX[nLayer][j][i];
+					}
+					if (aY[nLayer][j][i] > B_max) {
+						B_max = aY[nLayer][j][i];
+					}
+				}
+			}
+
+			for ( var c = 0; c <= canvasWidth; c++ ) {
+				A_extend[c] = new Array(canvasWidth);
+				B_extend[c] = new Array(canvasWidth);
+			}
+
+			for ( var j = 0; j < ny; j++ ) {
+				for ( var i = 0; i < nx; i++ ) {
+					for ( var yi = 0; yi < xn; yi++ ) {
+						py = yi/xn;
+						for ( var xi = 0; xi < xn; xi++ ) {
+							px = xi/xn;
+
+							A_extend[j*xn+yi][i*xn+xi]
+								= aX[nLayer][j][i]*(1-py)*(1-px)
+								+ aX[nLayer][j][i+1]*(1-py)*px
+								+ aX[nLayer][j+1][i]*py*(1-px)
+								+ aX[nLayer][j+1][i+1]*py*px;
+
+							B_extend[j*xn+yi][i*xn+xi]
+								= aY[nLayer][j][i]*(1-py)*(1-px)
+								+ aY[nLayer][j][i+1]*(1-py)*px
+								+ aY[nLayer][j+1][i]*py*(1-px)
+								+ aY[nLayer][j+1][i+1]*py*px;
+						}
+					}
+				}
+			}
+
+			var S_max = Math.max( A_max, B_max ) || 1;
+
+			for (var cy = 0; cy < canvasWidth; cy++) {
+				for (var cx = 0; cx < canvasWidth; cx++) {
+					var A_color = Math.ceil(A_extend[cy][cx] / A_max * 255);
+					var B_color = Math.ceil(B_extend[cy][cx] / B_max * 255);
+					drawPixel(cx, cy, A_color, B_color, 0, 255); // (x, y, r, g, b, a)
+				}
+			}
+			updateCanvas();
+
+			$('#info, #info2').show();
+
+			$('#options .gradient1 .right').html((A_max*1e6).toPrecision(3) + 'см<sup>-3</sup>');
+			$('#options .gradient2 .right').html((B_max*1e6).toPrecision(3) + 'см<sup>-3</sup>');
+
+			$('#myCanvas').mousemove(function() {
+				var coords = canvas.relMouseCoords(event),
+					canvasX = coords.x,
+					canvasY = coords.y;
+
+				$('#mouseX').html(canvasX);
+				$('#mouseY').html(canvasY);
+				if ( A_extend[canvasY][canvasX]*1e6 < 1) {
+					$('#concA').html('0');
+				} else {
+					$('#concA').html( (A_extend[canvasY][canvasX]*1e6 || 0).toPrecision(3) );
+				}
+				if ( B_extend[canvasY][canvasX]*1e6 < 1) {
+					$('#concB').html('0');
+				} else {
+					$('#concB').html( (B_extend[canvasY][canvasX]*1e6 || 0).toPrecision(3) );
+				}
+
+				$('#coordX').html( (canvasX*dl*1000/xn).toPrecision(3) );
+				$('#coordY').html( (canvasY*dl*1000/xn).toPrecision(3) );
+			});
+		}
+
 		function evaluate() {
-			var T = getParam('T'),					// chas processu, sec
-				W = getParam('W'),					// shirina plastini, m
-				H = getParam('H'),					// glubina plastini, m
+			var T = getParam('T') * 60,				// chas processu, sec
+				W = getParam('W') / 1000,			// shirina plastini, m
+				H = getParam('H') / 1000,			// glubina plastini, m
 				tn = 100,							// proponovana kilkist intervaliv chasu
 				xn = 6,								// koeficient mnozhennya n
 				n = (canvasWidth-1)/xn,				// proponovana kilkist intervaliv po X
@@ -301,29 +397,20 @@
 			}
 
 			ASpaces.forEach(function(ASpace) {
-				for (var i = Math.round(ASpace[0]/dl); i <= Math.round(ASpace[1]/dl); i++) {
-					AGU[i] = ASpace[2];
+				for (var i = Math.round((ASpace[0]/1000)/dl); i <= Math.round((ASpace[1]/1000)/dl); i++) {
+					AGU[i] = ASpace[2]/1e6;
 				}
 			});
 			BSpaces.forEach(function(BSpace) {
-				for (var i = Math.round(BSpace[0]/dl); i <= Math.round(BSpace[1]/dl); i++) {
-					BGU[i] = BSpace[2];
+				for (var i = Math.round((BSpace[0]/1000)/dl); i <= Math.round((BSpace[1]/1000)/dl); i++) {
+					BGU[i] = BSpace[2]/1e6;
 				}
 			});
-
-			// win.console.log( 'AGU:' );
-			// win.console.log( AGU );
 
 			for (var i = 0; i < nx+1; i++) {
 				ANU[0][i] = AGU[i];
 				BNU[0][i] = BGU[i];
 			}
-
-			// win.console.log( 'ANU:' );
-			// win.console.log( ANU );
-
-			// win.console.log( 'APR: ' );
-			// win.console.log( APR );
 
 			if (!usePrev) {
 				APR = deepCopy(ANU);
@@ -380,79 +467,12 @@
 				Bcalc[t+1] = deepCopy(BPR);
 			}
 
-			// win.console.log( 'Acalc:' );
-			// win.console.log( Acalc );
-
-			win.console.log('usePrev: ' + usePrev);
-			win.console.log('Безрозмірна дифузія: ' + G);
-
-			var c_max = 0;
-			var nLayer = 99;
-			for (var j = 0; j < ny+1; j++) {
-				for (var i = 0; i < nx+1; i++) {
-					if (Acalc[nLayer][j][i] > c_max) {
-						c_max = Acalc[nLayer][j][i];
-					}
-				}
-			}
-			win.console.log('Cmax: ' + Cmax);
-
-			var c_extend = new Array(canvasHeight),
-				px = null,
-				py = null;
-				c_left = null,
-				c_right = null,
-				c_current = null;
-
-			for ( var c = 0; c <= canvasWidth; c++ ) {
-				c_extend[c] = new Array(canvasWidth);
-			}
-			for ( var j = 0; j < ny; j++ ) {
-				for ( var i = 0; i < nx; i++ ) {
-					for ( var yi = 0; yi < xn; yi++ ) {
-						py = yi/xn;
-						for ( var xi = 0; xi < xn; xi++ ) {
-							px = xi/xn;
-							c_extend[j*xn+yi][i*xn+xi]
-								= Acalc[nLayer][j][i]*(1-py)*(1-px)
-								+ Acalc[nLayer][j][i+1]*(1-py)*px
-								+ Acalc[nLayer][j+1][i]*py*(1-px)
-								+ Acalc[nLayer][j+1][i+1]*py*px;
-						}
-					}
-				}
-			}
-
-			win.console.log('c_extend');
-			win.console.log(c_extend);
-
-			win.console.log('c_max: ' + c_max);
-			if (!c_max) c_max = 1;
-
-			for (var cy = 0; cy < canvasWidth; cy++) {
-				for (var cx = 0; cx < canvasWidth; cx++) {
-					c_color = Math.ceil(c_extend[cy][cx] / c_max * 255);
-					drawPixel(cx, cy, c_color, 0, 255-c_color, 255);
-				}
-			}
-			updateCanvas();
-			$('#info, #info2').show();
-
-			$('#options .gradient .right').html(c_max.toPrecision(3) + '%');
-
-			$('#myCanvas').mousemove(function() {
-				var coords = canvas.relMouseCoords(event),
-					canvasX = coords.x,
-					canvasY = coords.y;
-
-				$('#coordX').html(canvasX);
-				$('#coordY').html(canvasY);
-				$('#conc').html((c_extend[canvasY][canvasX] || 0).toFixed(3));
-
-				$('#time').html((canvasY*dt).toFixed(0));
-				$('#formatted_time2').html(convertTime($('#time').html()));
-				$('#abs').html((canvasX*dl/xn).toFixed(10));
-			});
+			$( '#timeRange' ).val(100);
+			$( '#timeRange' ).bind( 'change', function() {
+				drawLayer( Acalc, Bcalc, $(this).val(), dl, nx, ny, xn );
+				$('#time').html( $(this).val()*T/6000 );
+				$('#formatted_time2').html( convertTime($('#time').html() * 60) );
+			}).change();
 		};
 
 		$('#evaluate').click(function() {
