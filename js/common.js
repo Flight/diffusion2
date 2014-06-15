@@ -10,7 +10,9 @@
 			BtypeN,															// tip providnosti drugoi domishki
 			canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight),
 			APR,															// masiv pershoi domishki
-			BPR;															// masiv drugoi domishki
+			BPR,															// masiv drugoi domishki
+			Acalc = [],														// rezultuuchiy masiv visualizacii A
+			Bcalc = [];														// rezultuuchiy masiv visualizacii B
 
 		// Stvoruemo ob'ekt dlay zberigannya
 		$.storage = new $.store();
@@ -212,7 +214,7 @@
 			return newObject;
 		}
 
-		function drawLayer( aX, aY, nLayer, dl, nx, ny, xn ) {
+		function drawLayer( aX, aY, AGU, BGU, nLayer, dl, nx, ny, xn ) {
 			var A_max = 0,
 				B_max = 0,
 				A_extend = new Array(canvasHeight),
@@ -279,18 +281,26 @@
 					var A_color = Math.ceil(A_extend[cy][cx] / A_max * 255),
 						B_color = Math.ceil(B_extend[cy][cx] / B_max * 255),
 						PN_color = 0;
-						if ( cy > 0 && cx > 0 && cy < canvasWidth-1 && cx < canvasWidth-1
-							&& (
-								PN_extend[cy][cx]*PN_extend[cy][cx+1] < 0 ||
-								PN_extend[cy][cx]*PN_extend[cy][cx-1] < 0 ||
-								PN_extend[cy][cx]*PN_extend[cy-1][cx] < 0 ||
-								PN_extend[cy][cx]*PN_extend[cy+1][cx] < 0
-							)
-						) {
-							A_color = 0;
-							B_color = 0;
-							PN_color = 255;
-						}
+
+					if ( cy > 0 && cx > 0 && cy < canvasWidth-1 && cx < canvasWidth-1
+						&& (
+							PN_extend[cy][cx]*PN_extend[cy][cx+1] < 0 ||
+							PN_extend[cy][cx]*PN_extend[cy][cx-1] < 0 ||
+							PN_extend[cy][cx]*PN_extend[cy-1][cx] < 0 ||
+							PN_extend[cy][cx]*PN_extend[cy+1][cx] < 0
+						)
+					) {
+						A_color = 0;
+						B_color = 0;
+						PN_color = 255;
+					}
+
+					if ( cy < 2 && AGU[Math.floor(cx/xn)] === 0 && BGU[Math.floor(cx/xn)] === 0 ) {
+						A_color = 0;
+						B_color = 255;
+						PN_color = 255;
+					}
+
 					drawPixel(cx, cy, A_color, B_color, PN_color, 255); // (x, y, r, g, b, a)
 				}
 			}
@@ -355,9 +365,10 @@
 				AGU = [],							// masiv granichnih umov pershoi domishki
 				BGU = [],							// masiv granichnih umov drugoi domishki
 				Aprev = [],							// masiv poperednyogo slou pershoi domishki
-				Bprev = [],							// masiv poperednyogo slou drugoi domishki
-				Acalc = [],							// rezultuuchiy masiv visualizacii A
-				Bcalc = [];							// rezultuuchiy masiv visualizacii B
+				Bprev = [];							// masiv poperednyogo slou drugoi domishki
+
+			Acalc = [];
+			Bcalc = [];
 
 			if ( BSpaces.length && BD > AD ) {
 				DMax = BD;
@@ -501,7 +512,7 @@
 
 			$( '#timeRange' ).val(100);
 			$( '#timeRange' ).bind( 'change', function() {
-				drawLayer( Acalc, Bcalc, $(this).val(), dl, nx, ny, xn );
+				drawLayer( Acalc, Bcalc, AGU, BGU, $(this).val(), dl, nx, ny, xn );
 				$('#time').html( $(this).val()*T/6000 );
 				$('#formatted_time2').html( convertTime($('#time').html() * 60) );
 			}).change();
@@ -515,6 +526,22 @@
 				evaluate();
 			}
 		});
+		$( '#save_image' ).click(function() {
+			canvas.toBlob(function(blob) {
+				saveAs(blob, 'diffusion.png');
+			});
+		});
+		$( '#save_arrays' ).click(function() {
+			var	blobA,
+				blobB;
+
+			blob = new Blob(Acalc, {type: "text/plain;charset=utf-8"});
+			saveAs(blob, "pershaDomishka.txt");
+
+			blob = new Blob(Bcalc, {type: "text/plain;charset=utf-8"});
+			saveAs(blob, "drugaDomishka.txt");
+		});
+
 		$('#save').click(function() {
 			saveParams();
 		});
