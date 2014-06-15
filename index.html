@@ -19,9 +19,15 @@
 <body>
 	<div id="wrapper">
 		<div id="canvas1_container">
-			<div class="axis"></div>
 			<h1 style="text-align: center;">Діаграма дифузійного процесу</h1>
-			<canvas width="601" height="601" id="myCanvas" style="margin: 0 auto; display:block;">Будь-ласка, поновіть версію вашого браузеру</canvas>
+			<div id="timeRangeContainer" class="hidden">
+				Час: <strong id="time"></strong> хв. (<strong id="formatted_time2"></strong>)
+				<input type="range" step="1" value="100" id="timeRange">
+			</div>
+			<div id="graphContainer">
+				<div class="axis"></div>
+				<canvas width="601" height="601" id="myCanvas" style="margin: 0 auto; display:block;">Будь-ласка, поновіть версію вашого браузеру</canvas>
+			</div>
 			<div id="copyright">Розробив студент групи ЗДП-81 Негометянов Є.Ю. для дипломної роботи спецiалiста.<br>НТУУ КПІ, Київ 2014.</div>
 		</div>
 
@@ -29,8 +35,6 @@
 			<div class="evaluate_container"><input type="button" id="evaluate" value="Розрахувати" class="dec-red dec-bold"></div>
 
 			<div class="output hidden" id="info">
-				<input type="range" step="1" value="100" id="timeRange"><br>
-				Час: <strong id="time"></strong> хв. (<strong id="formatted_time2"></strong>)<br>
 				Положення X: <strong id="coordX"></strong> мм.<br>
 				Положення Y: <strong id="coordY"></strong> мм.<br>
 				Концентрація I домішки: <strong id="concA"></strong>см<sup>-3</sup><br>

@@ -5,7 +5,9 @@
 			canvasHeight = canvas.height,									// Zadaemo visotu holstu
 			ctx = canvas.getContext("2d"),									// Viznachaemo 2d koordinaty
 			AD,																// koefficient difuzii pershoi domishki, m2/s
+			AtypeN,															// tip providnosti pershoi domishki
 			BD,																// koefficient difuzii drugoi domishki, m2/s
+			BtypeN,															// tip providnosti drugoi domishki
 			canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight),
 			APR,															// masiv pershoi domishki
 			BPR;															// masiv drugoi domishki
@@ -175,6 +177,9 @@
 			AD = getDiffusion(AName, TS);
 			BD = getDiffusion(BName, TS);
 
+			AtypeN = LE[AName].tN;
+			BtypeN = LE[BName].tN;
+
 			$( '#koef_A, #koef_B' ).show();
 			$( '#dif_A' ).text( (AD*10000).toPrecision(3) );
 			$( '#dif_B' ).text( (BD*10000).toPrecision(3) );
@@ -188,9 +193,9 @@
 				aInputs = $( '.' + $(this).data('inputs') );
 
 			aInputs.each( function() {
-				$(this).attr( 'default', leg_elements[sElement].CT.toPrecision(1) );
-				$(this).attr( 'value', leg_elements[sElement].CT.toPrecision(1) );
-				$(this).attr( 'step', leg_elements[sElement].step.toPrecision(1) );
+				$(this).attr( 'default', LE[sElement].CT.toPrecision(1) );
+				$(this).attr( 'value', LE[sElement].CT.toPrecision(1) );
+				$(this).attr( 'step', LE[sElement].step.toPrecision(1) );
 			});
 		});
 
@@ -212,6 +217,9 @@
 				B_max = 0,
 				A_extend = new Array(canvasHeight),
 				B_extend = new Array(canvasHeight),
+				PN_extend = new Array(canvasHeight),
+				KAtype,
+				KBtype,
 				px = null,
 				py = null;
 
@@ -229,6 +237,7 @@
 			for ( var c = 0; c <= canvasWidth; c++ ) {
 				A_extend[c] = new Array(canvasWidth);
 				B_extend[c] = new Array(canvasWidth);
+				PN_extend[c] = new Array(canvasWidth);
 			}
 
 			for ( var j = 0; j < ny; j++ ) {
@@ -254,18 +263,41 @@
 				}
 			}
 
+			KAtype = AtypeN === true ? 1 : -1;
+			KBtype = BtypeN === true ? 1 : -1;
+
+			for (var cy = 0; cy < canvasWidth; cy++) {
+				for (var cx = 0; cx < canvasWidth; cx++) {
+					PN_extend[cy][cx] = KAtype*A_extend[cy][cx] + KBtype*B_extend[cy][cx];
+				}
+			}
+
 			var S_max = Math.max( A_max, B_max ) || 1;
 
 			for (var cy = 0; cy < canvasWidth; cy++) {
 				for (var cx = 0; cx < canvasWidth; cx++) {
-					var A_color = Math.ceil(A_extend[cy][cx] / A_max * 255);
-					var B_color = Math.ceil(B_extend[cy][cx] / B_max * 255);
-					drawPixel(cx, cy, A_color, B_color, 0, 255); // (x, y, r, g, b, a)
+					var A_color = Math.ceil(A_extend[cy][cx] / A_max * 255),
+						B_color = Math.ceil(B_extend[cy][cx] / B_max * 255),
+						PN_color = 0;
+						if ( cy > 0 && cx > 0 && cy < canvasWidth-1 && cx < canvasWidth-1
+							&& (
+								PN_extend[cy][cx]*PN_extend[cy][cx+1] < 0 ||
+								PN_extend[cy][cx]*PN_extend[cy][cx-1] < 0 ||
+								PN_extend[cy][cx]*PN_extend[cy-1][cx] < 0 ||
+								PN_extend[cy][cx]*PN_extend[cy+1][cx] < 0
+							)
+						) {
+							A_color = 0;
+							B_color = 0;
+							PN_color = 255;
+						}
+					drawPixel(cx, cy, A_color, B_color, PN_color, 255); // (x, y, r, g, b, a)
 				}
 			}
 			updateCanvas();
 
 			$('#info, #info2').show();
+			$('#timeRangeContainer').removeClass('hidden');
 
 			$('#options .gradient1 .right').html((A_max*1e6).toPrecision(3) + 'см<sup>-3</sup>');
 			$('#options .gradient2 .right').html((B_max*1e6).toPrecision(3) + 'см<sup>-3</sup>');
