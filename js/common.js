@@ -376,7 +376,7 @@
 				DMax = AD;
 			}
 
-			deltaMax = dl*dl/(2*DMax);
+			deltaMax = dl*dl/(4*DMax);
 
 			if (dt > deltaMax) {
 				P = Math.round(dt/deltaMax+0.5);
@@ -508,6 +508,14 @@
 
 				Acalc[t+1] = deepCopy(APR);
 				Bcalc[t+1] = deepCopy(BPR);
+			}
+			for (var t=0; t < tn; t++) {
+				for (var j = 1; j < ny; j++) {
+					for (var i = 1; i < nx; i++) {
+						Acalc[t+1][j][i] = (Acalc[t+1][j][i] > 1e11) ? Acalc[t+1][j][i] : 0;
+						Bcalc[t+1][j][i] = (Bcalc[t+1][j][i] > 1e11) ? Bcalc[t+1][j][i] : 0;
+					}
+				}
 			}
 
 			$( '#timeRange' ).val(100);

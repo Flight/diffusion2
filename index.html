@@ -56,9 +56,9 @@
 				Курсор: <strong id="mouseX"></strong>:<strong id="mouseY"></strong><br>
 			</div>
 
-			<label><input name="T" type="number" value="" min="0" default="120000" id="param_T"> Час процесу, хв (<strong id="formatted_time"></strong>)</label><br>
-			<label><input name="W" type="number" value="" min="0" default="1" step="0.1" id="param_W"> Ширина пластини, мм</label><br>
-			<label><input name="H" type="number" value="" min="0" default="1" step="0.1" id="param_H"> Глубина пластини, мм</label><br>
+			<label><input name="T" type="number" value="" min="0" default="40" id="param_T"> Час процесу, хв (<strong id="formatted_time"></strong>)</label><br>
+			<label><input name="W" type="number" value="" min="0" default="0.02" step="0.001" id="param_W"> Ширина пластини, мм</label><br>
+			<label><input name="H" type="number" value="" min="0" default="0.02" step="0.001" id="param_H"> Глубина пластини, мм</label><br>
 			<label><input name="TS" type="number" value="" min="900" max="1400" default="1200" step="50" id="param_TS"> Температура середовища, &deg;C</label><br>
 			<br>
 
@@ -73,13 +73,13 @@
 			</select> Назва домішки<br>
 			<div class="b-space-container" id="param_space-container-A">
 				<div class="b-space-sample hidden">
-					<input name="AX1_num" type="number" value="" min="0" default="0.1" step="0.1" id="param_AX1_num">
-					<input name="AX2_num" type="number" value="" min="0" default="0.2" step="0.1" id="param_AX2_num"> Границі вікна, мм<br>
+					<input name="AX1_num" type="number" value="" min="0" default="0" step="0.001" id="param_AX1_num">
+					<input name="AX2_num" type="number" value="" min="0" default="0.003" step="0.001" id="param_AX2_num"> Границі вікна, мм<br>
 					<label><input name="AC_num" type="number" value="" min="0" default="5e+20" max="1e25" step="1e19" id="param_AC_num" class="AName_input"> Концентрація домішки, см<sup>-3</sup></label><br>
 				</div>
 				<div class="b-space" data-num="1">
-					<input name="AX1_1" type="number" value="" min="0" default="0" step="0.1" id="param_AX1_1">
-					<input name="AX2_1" type="number" value="" min="0" default="0.3" step="0.1" id="param_AX2_1"> Границі вікна, мм<br>
+					<input name="AX1_1" type="number" value="" min="0" default="0" step="0.001" id="param_AX1_1">
+					<input name="AX2_1" type="number" value="" min="0" default="0.003" step="0.001" id="param_AX2_1"> Границі вікна, мм<br>
 					<label><input name="AC_1" type="number" value="" min="0" default="5e+20" max="1e25" step="1e19" id="param_AC_1" class="AName_input"> Концентрація домішки, см<sup>-3</sup></label><br>
 				</div>
 			</div>
@@ -98,8 +98,8 @@
 			</select> Назва домішки<br>
 			<div class="b-space-container" id="param_space-container-B">
 				<div class="b-space-sample hidden">
-					<input name="BX1_num" type="number" value="" min="0" default="0.5" step="0.1" id="param_BX1_num">
-					<input name="BX2_num" type="number" value="" min="0" default="0.8" step="0.1" id="param_BX2_num"> Границі вікна, мм<br>
+					<input name="BX1_num" type="number" value="" min="0" default="0.01" step="0.001" id="param_BX1_num">
+					<input name="BX2_num" type="number" value="" min="0" default="0.013" step="0.001" id="param_BX2_num"> Границі вікна, мм<br>
 					<label><input name="BC_num" type="number" value="" min="0" default="5e+20" max="1e25" step="1e19" id="param_BC_num" class="BName_input"> Концентрація домішки, см<sup>-3</sup></label><br>
 				</div>
 			</div>
